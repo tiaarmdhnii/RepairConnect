@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="id" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Admin | RepairConnect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #172033;
+        --blue: #1769aa;
+        --amber: #f3a712;
+      }
+      body {
+        font-family: "DM Sans", sans-serif;
+        color: var(--ink);
+        background: #f3f6f9;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: "Manrope", sans-serif;
+      }
+      .admin-input {
+        width: 100%;
+        border: 1px solid #d6e0e8;
+        border-radius: 9px;
+        background: #fff;
+        padding: 10px 12px;
+        font-size: 13px;
+        outline: none;
+      }
+      .admin-input:focus {
+        border-color: #3182bd;
+        box-shadow: 0 0 0 3px #3182bd20;
+      }
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .table-scroll table {
+        min-width: 860px;
+      }
+      .login-backdrop {
+        background:
+          radial-gradient(ellipse at 18% 18%, #dcecf6 0, transparent 34%),
+          radial-gradient(ellipse at 92% 84%, #fff0cf 0, transparent 30%),
+          #f3f6f9;
+      }
+      section[id] {
+        scroll-margin-top: 5.5rem;
+      }
+      @media (min-width: 1024px) {
+        .admin-sidebar {
+          position: fixed;
+          top: 6rem;
+          bottom: 0;
+          left: max(1rem, calc((100vw - 1440px) / 2 + 1rem));
+          width: 220px;
+          z-index: 20;
+        }
+      }
+      @media (max-width: 640px) {
+        .table-scroll table {
+          min-width: 760px;
+        }
+      }
+    </style>
+  </head>
+  <body class="min-h-screen">
+    <main
+      id="loginView"
+      class="login-backdrop min-h-screen flex items-center justify-center px-4 py-10"
+    >
+      <section
+        class="w-full max-w-md bg-white border border-slate-200 shadow-xl shadow-slate-900/5 rounded-2xl p-7 sm:p-9"
+      >
+        <a
+          href="index.html"
+          class="inline-flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-blue-700"
+          ><span
+            class="w-9 h-9 rounded-xl bg-blue-700 text-white grid place-items-center text-xs"
+            >RC</span
+          >
+          RepairConnect</a
+        >
+        <div class="mt-8">
+          <p
+            class="text-[11px] font-extrabold tracking-widest uppercase text-amber-700"
+          >
+            Admin Console
+          </p>
+          <h1 class="text-2xl font-extrabold mt-2">Masuk ke Dashboard</h1>
+          <p class="text-sm text-slate-500 mt-2">
+            Gunakan PIN demo untuk mengelola mitra dan memantau nota.
+          </p>
+        </div>
+        <form id="loginForm" class="mt-7 space-y-4">
+          <label class="block text-xs font-bold text-slate-700" for="adminPin"
+            >PIN Admin
+            <input
+              id="adminPin"
+              class="admin-input mt-2"
+              type="password"
+              inputmode="numeric"
+              autocomplete="current-password"
+              maxlength="12"
+              placeholder="Masukkan PIN"
+              required
+            />
+          </label>
+          <p
+            id="loginError"
+            class="hidden text-xs font-semibold text-rose-700"
+          ></p>
+          <button
+            class="w-full rounded-lg bg-blue-700 hover:bg-blue-800 text-white py-3 text-sm font-bold transition"
+          >
+            <i class="fa-solid fa-lock-open mr-2"></i>Masuk
+          </button>
+          <p class="text-[11px] text-slate-400 text-center">
+            PIN demo: <span class="font-bold text-slate-600">123456</span>
+          </p>
+        </form>
+      </section>
+    </main>
+
+    <div id="dashboardView" class="hidden min-h-screen">
+      <header
+        class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200"
+      >
+        <div
+          class="max-w-[1440px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3"
+        >
+          <a href="index.html" class="flex items-center gap-2.5 min-w-0">
+            <span
+              class="w-9 h-9 rounded-xl bg-blue-700 text-white grid place-items-center text-xs font-extrabold shrink-0"
+              >RC</span
+            >
+            <span class="min-w-0"
+              ><span
+                class="block font-extrabold text-sm sm:text-base leading-tight"
+                >RepairConnect</span
+              ><span class="block text-[10px] text-slate-500"
+                >Dashboard Admin</span
+              ></span
+            >
+          </a>
+          <div class="flex items-center gap-2">
+            <button
+              id="sidebarToggle"
+              type="button"
+              class="lg:hidden border border-slate-200 hover:bg-slate-50 rounded-lg w-9 h-9 text-slate-700"
+              aria-label="Buka menu dashboard"
+              aria-controls="mobileSidebar"
+              aria-expanded="false"
+              title="Buka menu dashboard"
+            >
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <span
+              id="syncStatus"
+              class="hidden sm:inline-flex items-center gap-1.5 text-[11px] text-emerald-700 font-semibold"
+              ><i class="fa-solid fa-circle-check"></i> Tersinkron lokal</span
+            >
+            <button
+              id="logoutButton"
+              class="border border-slate-200 hover:bg-slate-50 rounded-lg px-3 py-2 text-xs font-bold text-slate-700"
+            >
+              <i class="fa-solid fa-arrow-right-from-bracket mr-1.5"></i>Keluar
+            </button>
+          </div>
+        </div>
+        <div
+          id="mobileSidebar"
+          class="hidden lg:hidden border-t border-slate-200 bg-white px-4 py-3"
+        >
+          <nav class="grid grid-cols-2 gap-2" aria-label="Menu dashboard">
+            <a
+              data-admin-nav
+              href="#overview"
+              class="admin-nav-link rounded-lg px-3 py-2.5 text-xs font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-800"
+              ><i class="fa-solid fa-chart-pie w-5"></i>Ringkasan</a
+            >
+            <a
+              data-admin-nav
+              href="#merchants"
+              class="admin-nav-link rounded-lg px-3 py-2.5 text-xs font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-800"
+              ><i class="fa-solid fa-store w-5"></i>Mitra & Verifikasi</a
+            >
+            <a
+              data-admin-nav
+              href="#radius"
+              class="admin-nav-link rounded-lg px-3 py-2.5 text-xs font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-800"
+              ><i class="fa-solid fa-location-crosshairs w-5"></i>Simulasi
+              GPS</a
+            >
+            <a
+              data-admin-nav
+              href="#passports"
+              class="admin-nav-link rounded-lg px-3 py-2.5 text-xs font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-800"
+              ><i class="fa-solid fa-qrcode w-5"></i>Nota Digital</a
+            >
+          </nav>
+        </div>
+      </header>
+
+      <main class="max-w-[1440px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div
+          class="grid lg:grid-cols-[220px_minmax(0,1fr)] gap-5 lg:gap-7 items-start"
+        >
+          <aside
+            class="admin-sidebar hidden lg:block"
+            aria-label="Sidebar dashboard"
+          >
+            <div class="flex h-full flex-col gap-3">
+              <div class="px-3">
+                <p
+                  class="text-[10px] font-extrabold tracking-widest uppercase text-slate-400"
+                >
+                  Menu Dashboard
+                </p>
+              </div>
+              <nav
+                class="flex flex-1 flex-col bg-white border border-slate-200 rounded-xl p-2 space-y-1"
+                aria-label="Navigasi dashboard"
+              >
+                <a
+                  data-admin-nav
+                  href="#overview"
+                  class="admin-nav-link flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-800"
+                  ><i class="fa-solid fa-chart-pie w-5 text-center"></i
+                  >Ringkasan</a
+                >
+                <a
+                  data-admin-nav
+                  href="#merchants"
+                  class="admin-nav-link flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-800"
+                  ><i class="fa-solid fa-store w-5 text-center"></i>Mitra &
+                  Verifikasi</a
+                >
+                <a
+                  data-admin-nav
+                  href="#radius"
+                  class="admin-nav-link flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-800"
+                  ><i
+                    class="fa-solid fa-location-crosshairs w-5 text-center"
+                  ></i
+                  >Simulasi GPS</a
+                >
+                <a
+                  data-admin-nav
+                  href="#passports"
+                  class="admin-nav-link flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-800"
+                  ><i class="fa-solid fa-qrcode w-5 text-center"></i>Nota
+                  Digital</a
+                >
+                <div class="my-2 mt-auto border-t border-slate-100"></div>
+                <a
+                  href="index.html"
+                  class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                  ><i
+                    class="fa-solid fa-arrow-up-right-from-square w-5 text-center"
+                  ></i
+                  >Halaman Pelanggan</a
+                >
+              </nav>
+            </div>
+          </aside>
+          <div class="min-w-0 space-y-7 lg:col-start-2">
+            <section
+              id="overview"
+              class="flex flex-col sm:flex-row sm:items-end justify-between gap-3"
+            >
+              <div>
+                <p
+                  class="text-[11px] font-extrabold tracking-widest uppercase text-amber-700"
+                >
+                  Operasional Nasional
+                </p>
+                <h1 class="text-2xl sm:text-3xl font-extrabold mt-1">
+                  Mitra & Aktivitas
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">
+                  Kelola verifikasi, jangkauan daerah, dan riwayat
+                  RepairConnect.
+                </p>
+              </div>
+              <button
+                id="refreshButton"
+                class="self-start sm:self-auto border border-slate-300 bg-white hover:bg-slate-50 rounded-lg px-3.5 py-2.5 text-xs font-bold"
+              >
+                <i class="fa-solid fa-rotate mr-1.5"></i>Segarkan Data
+              </button>
+            </section>
+
+            <section
+              aria-label="Ringkasan statistik"
+              class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4"
+            >
+              <article
+                class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5"
+              >
+                <p class="text-xs font-semibold text-slate-500">Total Mitra</p>
+                <div class="flex items-end justify-between mt-3">
+                  <strong id="kpiTotal" class="text-3xl font-extrabold"
+                    >0</strong
+                  ><i class="fa-solid fa-store text-blue-700 text-lg"></i>
+                </div>
+              </article>
+              <article
+                class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5"
+              >
+                <p class="text-xs font-semibold text-slate-500">
+                  Terverifikasi
+                </p>
+                <div class="flex items-end justify-between mt-3">
+                  <strong
+                    id="kpiVerified"
+                    class="text-3xl font-extrabold text-emerald-700"
+                    >0</strong
+                  ><i
+                    class="fa-solid fa-circle-check text-emerald-600 text-lg"
+                  ></i>
+                </div>
+              </article>
+              <article
+                class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5"
+              >
+                <p class="text-xs font-semibold text-slate-500">
+                  Menunggu Verifikasi
+                </p>
+                <div class="flex items-end justify-between mt-3">
+                  <strong
+                    id="kpiPending"
+                    class="text-3xl font-extrabold text-amber-700"
+                    >0</strong
+                  ><i
+                    class="fa-solid fa-hourglass-half text-amber-600 text-lg"
+                  ></i>
+                </div>
+              </article>
+              <article
+                class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5"
+              >
+                <p class="text-xs font-semibold text-slate-500">
+                  Kota / Daerah Terjangkau
+                </p>
+                <div class="flex items-end justify-between mt-3">
+                  <strong
+                    id="kpiAreas"
+                    class="text-3xl font-extrabold text-blue-800"
+                    >0</strong
+                  ><i
+                    class="fa-solid fa-map-location-dot text-blue-700 text-lg"
+                  ></i>
+                </div>
+              </article>
+            </section>
+
+            <section
+              id="merchants"
+              class="grid xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)] gap-5 items-start"
+            >
+              <section
+                id="radius"
+                class="bg-white border border-slate-200 rounded-xl overflow-hidden"
+              >
+                <div
+                  class="px-4 sm:px-5 py-4 border-b border-slate-200 flex items-center justify-between gap-3"
+                >
+                  <div>
+                    <h2 class="font-extrabold text-base">Daftar Mitra</h2>
+                    <p class="text-[11px] text-slate-500 mt-0.5">
+                      Perubahan langsung tersimpan di browser ini.
+                    </p>
+                  </div>
+                  <span
+                    id="tableCount"
+                    class="text-[11px] font-bold text-slate-500"
+                  ></span>
+                </div>
+                <div class="p-4 sm:p-5 space-y-4">
+                  <div class="grid sm:grid-cols-[1fr_190px_160px] gap-2.5">
+                    <label class="relative"
+                      ><span class="sr-only">Cari nama toko</span
+                      ><i
+                        class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"
+                      ></i
+                      ><input
+                        id="searchInput"
+                        class="admin-input pl-9"
+                        type="search"
+                        placeholder="Cari nama toko..."
+                    /></label>
+                    <select
+                      id="cityFilter"
+                      class="admin-input"
+                      aria-label="Filter kota"
+                    >
+                      <option value="">Semua kota / daerah</option>
+                    </select>
+                    <select
+                      id="statusFilter"
+                      class="admin-input"
+                      aria-label="Filter status"
+                    >
+                      <option value="">Semua status</option>
+                      <option>Verified</option>
+                      <option>Pending</option>
+                    </select>
+                  </div>
+                  <div class="table-scroll border border-slate-200 rounded-lg">
+                    <table class="w-full text-left text-xs">
+                      <thead class="bg-slate-50 text-slate-500">
+                        <tr>
+                          <th class="px-3 py-3 font-bold">Nama Toko</th>
+                          <th class="px-3 py-3 font-bold">Daerah</th>
+                          <th class="px-3 py-3 font-bold">Spesialisasi</th>
+                          <th class="px-3 py-3 font-bold">Status</th>
+                          <th class="px-3 py-3 font-bold">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody
+                        id="merchantRows"
+                        class="divide-y divide-slate-100"
+                      ></tbody>
+                    </table>
+                  </div>
+                  <p
+                    id="emptyMerchants"
+                    class="hidden py-8 text-center text-xs text-slate-500"
+                  >
+                    Tidak ada mitra yang cocok dengan filter.
+                  </p>
+                </div>
+              </section>
+
+              <section
+                id="merchantFormPanel"
+                class="bg-white border border-slate-200 rounded-xl overflow-hidden"
+              >
+                <div class="px-4 sm:px-5 py-4 border-b border-slate-200">
+                  <p
+                    class="text-[10px] font-extrabold uppercase tracking-widest text-blue-700"
+                  >
+                    Manajemen Data
+                  </p>
+                  <h2 id="formTitle" class="font-extrabold text-base mt-1">
+                    Tambah Mitra
+                  </h2>
+                </div>
+                <form id="merchantForm" class="p-4 sm:p-5 space-y-3 text-xs">
+                  <input id="merchantId" type="hidden" />
+                  <label class="block font-bold text-slate-700"
+                    >Nama Toko Servis<input
+                      id="merchantName"
+                      class="admin-input mt-1.5"
+                      required
+                      placeholder="Nama toko"
+                  /></label>
+                  <div class="grid grid-cols-2 gap-2.5">
+                    <label class="block font-bold text-slate-700"
+                      >Kota / Kabupaten<input
+                        id="merchantCity"
+                        class="admin-input mt-1.5"
+                        required
+                        placeholder="Bandung" /></label
+                    ><label class="block font-bold text-slate-700"
+                      >Provinsi<input
+                        id="merchantProvince"
+                        class="admin-input mt-1.5"
+                        required
+                        placeholder="Jawa Barat"
+                    /></label>
+                  </div>
+                  <label class="block font-bold text-slate-700"
+                    >Alamat Lengkap<input
+                      id="merchantAddress"
+                      class="admin-input mt-1.5"
+                      required
+                      placeholder="Jalan, kecamatan, kode pos"
+                  /></label>
+                  <label class="block font-bold text-slate-700"
+                    >Link Google Maps<input
+                      id="merchantMaps"
+                      type="text"
+                      class="admin-input mt-1.5"
+                      placeholder="https://maps.google.com/..."
+                  /></label>
+                  <div class="grid grid-cols-2 gap-2.5">
+                    <label class="block font-bold text-slate-700"
+                      >Latitude<input
+                        id="merchantLat"
+                        type="number"
+                        min="-90"
+                        max="90"
+                        step="any"
+                        class="admin-input mt-1.5"
+                        required
+                        placeholder="-6.9147" /></label
+                    ><label class="block font-bold text-slate-700"
+                      >Longitude<input
+                        id="merchantLng"
+                        type="number"
+                        min="-180"
+                        max="180"
+                        step="any"
+                        class="admin-input mt-1.5"
+                        required
+                        placeholder="107.6098"
+                    /></label>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <button
+                      id="currentLocationButton"
+                      type="button"
+                      class="border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-lg px-3 py-2 font-bold"
+                    >
+                      <i class="fa-solid fa-location-crosshairs mr-1"></i>Ambil
+                      koordinat saya</button
+                    ><button
+                      id="parseMapsButton"
+                      type="button"
+                      class="border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg px-3 py-2 font-bold"
+                    >
+                      <i class="fa-solid fa-arrow-down-long mr-1"></i>Ambil dari
+                      link Maps
+                    </button>
+                  </div>
+                  <p
+                    class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-[11px] leading-relaxed text-amber-900"
+                  >
+                    <i class="fa-solid fa-circle-info mr-1"></i>Untuk koordinat
+                    akurat, buka pin toko di Google Maps lalu salin pasangan
+                    angka pada URL (contoh <b>-6.9147, 107.6098</b>).
+                    Pendaftaran tanpa koordinat tidak dapat muncul pada hasil
+                    GPS.
+                  </p>
+                  <label class="block font-bold text-slate-700"
+                    >WhatsApp Business (format 628...)<input
+                      id="merchantPhone"
+                      type="tel"
+                      inputmode="numeric"
+                      pattern="628[0-9]{8,12}"
+                      class="admin-input mt-1.5"
+                      required
+                      placeholder="6281234567890"
+                  /></label>
+                  <label class="block font-bold text-slate-700"
+                    >Spesialisasi Servis<select
+                      id="merchantSpecialization"
+                      class="admin-input mt-1.5"
+                      required
+                    >
+                      <option value="Laptop / Notebook">
+                        Laptop / Notebook
+                      </option>
+                      <option value="Smartphone">Smartphone</option>
+                      <option value="PC / Komputer">PC / Komputer</option>
+                      <option value="Elektronik Umum">Elektronik Umum</option>
+                    </select></label
+                  >
+                  <label class="block font-bold text-slate-700"
+                    >Status Verifikasi<select
+                      id="merchantStatus"
+                      class="admin-input mt-1.5"
+                    >
+                      <option>Pending</option>
+                      <option>Verified</option>
+                    </select></label
+                  >
+                  <div class="flex gap-2 pt-1">
+                    <button
+                      type="submit"
+                      class="flex-1 rounded-lg bg-blue-700 hover:bg-blue-800 text-white py-2.5 font-bold"
+                    >
+                      <i class="fa-solid fa-floppy-disk mr-1.5"></i>Simpan Mitra</button
+                    ><button
+                      id="cancelEditButton"
+                      type="button"
+                      class="hidden border border-slate-200 hover:bg-slate-50 rounded-lg px-3 font-bold"
+                    >
+                      Batal
+                    </button>
+                  </div>
+                </form>
+              </section>
+            </section>
+
+            <section class="grid xl:grid-cols-2 gap-5 items-start">
+              <section
+                id="passports"
+                class="bg-white border border-slate-200 rounded-xl overflow-hidden"
+              >
+                <div class="px-4 sm:px-5 py-4 border-b border-slate-200">
+                  <h2 class="font-extrabold text-base">
+                    Simulasi Radius GPS 8 km
+                  </h2>
+                  <p class="text-[11px] text-slate-500 mt-1">
+                    Hanya mitra Verified, terurut dari jarak terdekat.
+                  </p>
+                </div>
+                <form
+                  id="radiusForm"
+                  class="p-4 sm:p-5 flex flex-wrap gap-2.5 items-end"
+                >
+                  <label
+                    class="flex-1 min-w-32 text-[11px] font-bold text-slate-600"
+                    >Latitude<input
+                      id="testLat"
+                      type="number"
+                      step="any"
+                      class="admin-input mt-1"
+                      required
+                      placeholder="-6.9147" /></label
+                  ><label
+                    class="flex-1 min-w-32 text-[11px] font-bold text-slate-600"
+                    >Longitude<input
+                      id="testLng"
+                      type="number"
+                      step="any"
+                      class="admin-input mt-1"
+                      required
+                      placeholder="107.6098" /></label
+                  ><button
+                    class="rounded-lg bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 text-xs font-bold"
+                  >
+                    <i class="fa-solid fa-location-dot mr-1"></i>Uji Radius
+                  </button>
+                </form>
+                <div
+                  id="radiusResults"
+                  class="px-4 sm:px-5 pb-5 text-xs text-slate-500"
+                >
+                  Masukkan titik GPS untuk melihat hasil uji.
+                </div>
+              </section>
+              <section
+                class="bg-white border border-slate-200 rounded-xl overflow-hidden"
+              >
+                <div
+                  class="px-4 sm:px-5 py-4 border-b border-slate-200 flex items-center justify-between gap-2"
+                >
+                  <div>
+                    <h2 class="font-extrabold text-base">
+                      Nota Garansi Digital
+                    </h2>
+                    <p class="text-[11px] text-slate-500 mt-1">
+                      Riwayat nota dan QR Passport yang tersimpan di browser
+                      ini.
+                    </p>
+                  </div>
+                  <span
+                    id="passportCount"
+                    class="text-[11px] font-bold text-slate-500"
+                  ></span>
+                </div>
+                <div
+                  id="passportRows"
+                  class="p-4 sm:p-5 space-y-2.5 max-h-[390px] overflow-y-auto"
+                ></div>
+              </section>
+            </section>
+            <footer
+              class="pb-5 text-[11px] text-slate-400 flex flex-wrap justify-between gap-2"
+            >
+              <span>RepairConnect Admin • Penyimpanan browser lokal</span
+              ><a
+                class="font-semibold text-blue-700 hover:text-blue-900"
+                href="index.html"
+                ><i class="fa-solid fa-arrow-left mr-1"></i>Kembali ke halaman
+                utama</a
+              >
+            </footer>
+          </div>
+        </div>
+      </main>
+    </div>
+    <div
+      id="toast"
+      class="fixed bottom-4 right-4 z-50 hidden max-w-sm rounded-lg bg-slate-900 text-white px-4 py-3 shadow-lg text-xs font-semibold"
+    ></div>
+    <script src="data/merchantStore.js"></script>
+    <script src="admin.js"></script>
+  </body>
+</html>
